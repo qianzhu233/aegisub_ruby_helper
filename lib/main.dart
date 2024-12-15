@@ -34,62 +34,57 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
   String _convertedText = '';
 
+  // Conversion logic
   String convertToK1Format(String text) {
-    // Split text into lines
     List<String> lines = text.split('\n');
 
-    // Process each line separately
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i];
 
-      // If the line contains any annotation, convert it
+      // Process lines containing annotations or phonetic notations
       if (line.contains('{{photrans|') || line.contains('（')) {
-        // Process this line and update it in the list
         lines[i] = _processLineForK1(line);
       }
     }
 
-    // Join the lines back into a single string
     return lines.join('\n');
   }
 
   String _processLineForK1(String line) {
-    // Step 1: Add leading {\k1} if necessary
-    line = '{\\k1}$line';
+    // Step 1: 确保行首添加单个 {\k1}
+    if (!line.startsWith(r'{\k1}')) {
+      line = '{\\k1}$line';
+    }
 
-    // Step 2: Handle spaces (half-width and full-width) between non-whitespace characters
-    line = line.replaceAllMapped(RegExp(r'(\S)([ 　]+)(\S)'), (match) {
-      return '${match.group(1)}{\\k1}${match.group(2)}{\\k1}${match.group(3)}';
-    }).replaceAllMapped(RegExp(r'([ 　]+)(\S)'), (match) {
-      return '{\\k1}${match.group(1)}${match.group(2)}';
-    }).replaceAllMapped(RegExp(r'(\S)([ 　]+)'), (match) {
-      return '${match.group(1)}{\\k1}${match.group(2)}';
-    });
-
-    // Step 3: Convert {{photrans|汉字|假名}} to {\k1}汉字|<假名{\k1}
+    // Step 2: 处理 {{photrans|汉字|假名}} 格式
     line = line.replaceAllMapped(RegExp(r'\{\{photrans\|([^|]+)\|([^}]+)\}\}'), (match) {
       return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
     });
 
-    // Step 4: Convert 汉字（假名） to {\k1}汉字|<假名{\k1}
-    line = line.replaceAllMapped(RegExp(r'([^（]+)（([^）]+)）'), (match) {
-      // Ensure the 汉字 part is wrapped in {\k1}
+    // Step 3: 处理 汉字（假名） 格式，仅为汉字添加注音
+    line = line.replaceAllMapped(RegExp(r'([\u4E00-\u9FFF]+)（([^）]+)）'), (match) {
       return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
     });
 
-    // Step 6: Remove consecutive {\k1} and ensure no duplicates
+    // Step 4: 处理空格（包含半角和全角空格），为其前后添加 {\k1}
+    line = line.replaceAllMapped(RegExp(r'(\S)([ 　]+)(\S)'), (match) {
+      return '${match.group(1)}{\\k1}${match.group(2)}{\\k1}${match.group(3)}';
+    });
+
+    // Step 5: 清除多余的 {\k1} 标记，确保不会重复
     line = line.replaceAll(RegExp(r'(\{\\k1\})+'), '{\\k1}');
 
     return line;
   }
 
-
+  // Convert text when button is pressed
   void _convertText() {
     setState(() {
       _convertedText = convertToK1Format(_controller.text);
     });
   }
 
+  // Copy converted text to clipboard
   void _copyToClipboard() {
     if (_convertedText.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: _convertedText));
@@ -119,12 +114,11 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                // Text field for input
                 Expanded(
                   child: SingleChildScrollView(
                     child: TextField(
                       controller: _controller,
-                      maxLines: null,
+                      maxLines: null, // No limit on input lines
                       decoration: const InputDecoration(
                         hintText: 'Enter text here...',
                         border: OutlineInputBorder(),
@@ -133,13 +127,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Button to trigger conversion
                 ElevatedButton(
                   onPressed: _convertText,
                   child: const Text('Convert'),
                 ),
                 const SizedBox(height: 16),
-                // Display the converted text
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
@@ -148,7 +140,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                // Copy button
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: ElevatedButton(
@@ -172,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Version: 1.0.1',
+                    'Version: 1.0.2',
                     style: TextStyle(fontSize: 18),
                   ),
                   SizedBox(height: 20),
