@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: DefaultTabController(
+      home: const DefaultTabController(
         length: 2, // 2 tabs: 1 for conversion, 1 for About
         child: MyHomePage(),
       ),
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -31,50 +35,54 @@ class _MyHomePageState extends State<MyHomePage> {
   String _convertedText = '';
 
   String convertToK1Format(String text) {
-    // Step 1: Check if the text contains "{{photrans|"
-    if (!text.contains('{{photrans|') && !text.contains('（')) {
-      return text; // Return original text if no annotation
+    // Split text into lines
+    List<String> lines = text.split('\n');
+
+    // Process each line separately
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+
+      // If the line contains any annotation, convert it
+      if (line.contains('{{photrans|') || line.contains('（')) {
+        // Process this line and update it in the list
+        lines[i] = _processLineForK1(line);
+      }
     }
 
-    // Step 2: Ensure text starts with {\k1}
-    text = '{\\k1}' + text;
+    // Join the lines back into a single string
+    return lines.join('\n');
+  }
 
-    // Step 3: Handle spaces (half-width and full-width)
-    text = text.replaceAllMapped(RegExp(r'(\S)([ 　]+)(\S)'), (match) {
+  String _processLineForK1(String line) {
+    // Step 1: Add leading {\k1} if necessary
+    line = '{\\k1}$line';
+
+    // Step 2: Handle spaces (half-width and full-width) between non-whitespace characters
+    line = line.replaceAllMapped(RegExp(r'(\S)([ 　]+)(\S)'), (match) {
       return '${match.group(1)}{\\k1}${match.group(2)}{\\k1}${match.group(3)}';
-    });
-    text = text.replaceAllMapped(RegExp(r'([ 　]+)(\S)'), (match) {
+    }).replaceAllMapped(RegExp(r'([ 　]+)(\S)'), (match) {
       return '{\\k1}${match.group(1)}${match.group(2)}';
-    });
-    text = text.replaceAllMapped(RegExp(r'(\S)([ 　]+)'), (match) {
+    }).replaceAllMapped(RegExp(r'(\S)([ 　]+)'), (match) {
       return '${match.group(1)}{\\k1}${match.group(2)}';
     });
 
-    // Step 4: Match and convert {{photrans|汉字|假名}} format
-    text = text.replaceAllMapped(RegExp(r'\{\{photrans\|([^|]+)\|([^}]+)\}\}'), (match) {
+    // Step 3: Convert {{photrans|汉字|假名}} to {\k1}汉字|<假名{\k1}
+    line = line.replaceAllMapped(RegExp(r'\{\{photrans\|([^|]+)\|([^}]+)\}\}'), (match) {
       return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
     });
 
-    // Step 5: Match and convert 汉字（假名） format
-    text = text.replaceAllMapped(RegExp(r'([^（]+)（([^）]+)）'), (match) {
-      // Ensure 汉字 part has {\k1}, then add the rest of the formatting
+    // Step 4: Convert 汉字（假名） to {\k1}汉字|<假名{\k1}
+    line = line.replaceAllMapped(RegExp(r'([^（]+)（([^）]+)）'), (match) {
+      // Ensure the 汉字 part is wrapped in {\k1}
       return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
     });
 
-    // Step 6: Remove multiple consecutive {\k1}
-    text = text.replaceAll(RegExp(r'(\{\\k1\})+'), '{\\k1}');
+    // Step 6: Remove consecutive {\k1} and ensure no duplicates
+    line = line.replaceAll(RegExp(r'(\{\\k1\})+'), '{\\k1}');
 
-    // Step 7: Ensure every 漢字 is prefixed with {\k1} at the final stage
-    // This regular expression now ensures that we only add {\k1} if it's missing
-    text = text.replaceAllMapped(RegExp(r'(?<!\\k1)[一-龯々〆〤]'), (match) {
-      return '{\\k1}${match.group(0)}';
-    });
-
-    // Step 8: Remove any redundant {\k1} at the beginning (if it was duplicated)
-    text = text.replaceAll(RegExp(r'\{\\k1\}\{\\k1\}'), '{\\k1}');
-
-    return text;
+    return line;
   }
+
 
   void _convertText() {
     setState(() {
@@ -86,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_convertedText.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: _convertedText));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Text copied to clipboard!')),
+        const SnackBar(content: Text('Text copied to clipboard!')),
       );
     }
   }
@@ -95,8 +103,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AegisubRubyHelper'),
-        bottom: TabBar(
+        title: const Text('AegisubRubyHelper'),
+        bottom: const TabBar(
           tabs: [
             Tab(text: 'Convert'),
             Tab(text: 'About'),
@@ -117,26 +125,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: TextField(
                       controller: _controller,
                       maxLines: null,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Enter text here...',
                         border: OutlineInputBorder(),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Button to trigger conversion
                 ElevatedButton(
                   onPressed: _convertText,
-                  child: Text('Convert'),
+                  child: const Text('Convert'),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Display the converted text
                 Expanded(
                   child: SingleChildScrollView(
                     child: Text(
                       _convertedText,
-                      style: TextStyle(fontFamily: 'monospace', fontSize: 16),
+                      style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
                     ),
                   ),
                 ),
@@ -145,15 +153,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: const EdgeInsets.only(top: 16.0),
                   child: ElevatedButton(
                     onPressed: _copyToClipboard,
-                    child: Text('Copy to Clipboard'),
+                    child: const Text('Copy to Clipboard'),
                   ),
                 ),
               ],
             ),
           ),
           // About Page
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -164,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    'Version: 1.0.0',
+                    'Version: 1.0.1',
                     style: TextStyle(fontSize: 18),
                   ),
                   SizedBox(height: 20),
