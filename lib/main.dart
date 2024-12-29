@@ -5,26 +5,51 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system; // Default to system mode
+
+  void _toggleThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AegisubRubyHelper',
       theme: ThemeData(
+        brightness: Brightness.light,
         primarySwatch: Colors.blue,
       ),
-      home: const DefaultTabController(
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+      ),
+      themeMode: _themeMode,
+      home: DefaultTabController(
         length: 2, // 2 tabs: 1 for conversion, 1 for About
-        child: MyHomePage(),
+        child: MyHomePage(
+          themeMode: _themeMode,
+          onThemeChanged: _toggleThemeMode,
+        ),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final ThemeMode themeMode;
+  final ValueChanged<ThemeMode> onThemeChanged;
+
+  const MyHomePage({super.key, required this.themeMode, required this.onThemeChanged});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -105,6 +130,26 @@ class _MyHomePageState extends State<MyHomePage> {
             Tab(text: 'About'),
           ],
         ),
+        actions: [
+          PopupMenuButton<ThemeMode>(
+            icon: const Icon(Icons.brightness_6),
+            onSelected: widget.onThemeChanged,
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: ThemeMode.system,
+                child: Text('System Default'),
+              ),
+              const PopupMenuItem(
+                value: ThemeMode.light,
+                child: Text('Light Mode'),
+              ),
+              const PopupMenuItem(
+                value: ThemeMode.dark,
+                child: Text('Dark Mode'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: TabBarView(
         children: [
