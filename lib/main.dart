@@ -61,6 +61,50 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
   String _convertedText = '';
 
+  Widget _buildInputField(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Scrollbar(
+        thumbVisibility: true,
+        child: TextField(
+          controller: _controller,
+          maxLines: null,
+          expands: true,
+          scrollPhysics: const BouncingScrollPhysics(),
+          decoration: const InputDecoration(
+            hintText: 'Enter text to convert...',
+            border: InputBorder.none,
+          ),
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOutputField(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: SingleChildScrollView(
+        child: SelectableText(
+          _convertedText,
+          style: const TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+
   String convertToK1Format(String text) {
     List<String> lines = text.split('\n');
     RegExp pattern = RegExp(
@@ -194,72 +238,60 @@ String _processLineForK1(String line) {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // 输入框部分
-                Flexible(
-                  flex: 3,
-                  child: TextField(
-                    controller: _controller,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: 'Enter text to convert...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).cardColor,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                bool isMobile = constraints.maxWidth < 600;
+
+                return Column(
+                  children: [
+                    // 输入框和输出框的布局，根据屏幕宽度动态调整
+                    Expanded(
+                      child: isMobile
+                          ? Column(
+                              children: [
+                                // 输入框部分
+                                Flexible(
+                                  flex: 1,
+                                  child: _buildInputField(context),
+                                ),
+                                const SizedBox(width: 16),
+                                // 输出框部分
+                                Flexible(
+                                  flex: 1,
+                                  child: _buildOutputField(context),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                // 左侧输入框
+                                Expanded(child: _buildInputField(context)),
+                                const SizedBox(width: 16),
+                                // 右侧输出框
+                                Expanded(child: _buildOutputField(context)),
+                              ],
+                            ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 转换按钮
-                ElevatedButton.icon(
-                  onPressed: _convertText,
-                  icon: const Icon(Icons.transform, size: 20),
-                  label: const Text('Convert Text'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 16),
+                    // 按钮区域
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _convertText,
+                          icon: const Icon(Icons.transform),
+                          label: const Text('Convert Text'),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: _copyToClipboard,
+                          icon: const Icon(Icons.copy),
+                          label: const Text('Copy to Clipboard'),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 输出框部分
-                Expanded(
-                  flex: 4,
-                  child: SingleChildScrollView(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        _convertedText,
-                        style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
-                      ),
-                    ),
-                  ),
-                ),
-                // 复制按钮
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: _copyToClipboard,
-                    icon: const Icon(Icons.copy, size: 20),
-                    label: const Text('Copy to Clipboard'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
           // 关于页面
@@ -292,6 +324,7 @@ String _processLineForK1(String line) {
           ),
         ],
       ),
+
     );
   }
 }
