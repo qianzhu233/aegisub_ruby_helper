@@ -85,7 +85,7 @@ String _processLineForK1(String line) {
     line = '{\\k1}$line';
   }
 
-  // Step 2: 处理 {{photrans|汉字|假名}} 格式
+  // Step 2: 处理 {{p(P)hotrans|汉字|假名}} 格式
   line = line.replaceAllMapped(RegExp(r'\{\{[pP]hotrans\|([^|]+)\|([^}]+)\}\}'), (match) {
     return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
   });
@@ -197,19 +197,24 @@ String _processLineForK1(String line) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                TextField(
-                  controller: _controller,
-                  maxLines: null,
-                  decoration: InputDecoration(
-                    hintText: 'Enter text to convert...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                // 输入框部分
+                Flexible(
+                  flex: 3,
+                  child: TextField(
+                    controller: _controller,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: 'Enter text to convert...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).cardColor,
                     ),
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
                   ),
                 ),
                 const SizedBox(height: 16),
+                // 转换按钮
                 ElevatedButton.icon(
                   onPressed: _convertText,
                   icon: const Icon(Icons.transform, size: 20),
@@ -222,7 +227,9 @@ String _processLineForK1(String line) {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // 输出框部分
                 Expanded(
+                  flex: 4,
                   child: SingleChildScrollView(
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -237,6 +244,7 @@ String _processLineForK1(String line) {
                     ),
                   ),
                 ),
+                // 复制按钮
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: ElevatedButton.icon(
@@ -254,6 +262,7 @@ String _processLineForK1(String line) {
               ],
             ),
           ),
+          // 关于页面
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Center(
