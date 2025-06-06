@@ -608,9 +608,27 @@ class _HomePageState extends State<HomePage> {
             child: TabBarView(
               children: [
                 _buildOutputField(context),
+                // 修改这里：让预览支持滑动
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
-                  child: _buildRubyPreviewMultiline(_controller.text, isDark: isDark),
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      maxHeight: 400, // 可根据需要调整最大高度
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: _buildRubyPreviewMultiline(_controller.text, isDark: isDark),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
