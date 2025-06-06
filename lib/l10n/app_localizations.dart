@@ -169,6 +169,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A simple and powerful tool to convert text to K1 format.\nDeveloped by qianzhu233.'**
   String get aboutText;
+
+  /// No description provided for @inputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get inputLabel;
+
+  /// No description provided for @outputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get outputLabel;
+
+  /// No description provided for @previewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get previewLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

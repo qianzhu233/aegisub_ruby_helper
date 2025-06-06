@@ -10,5 +10,8 @@
   "copiedText": "已複製到剪貼簿！",
   "hintText": "輸入要轉換的文本...",
   "version": "版本：1.0.3",
-  "aboutText": "一個簡單強大的K1格式文本轉換工具。\n作者：qianzhu233。"
+  "aboutText": "一個簡單強大的K1格式文本轉換工具。\n作者：qianzhu233。",
+  "inputLabel": "輸入",
+  "outputLabel": "輸出",
+  "previewLabel": "預覽"
 }

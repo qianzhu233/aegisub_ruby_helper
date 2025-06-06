@@ -43,6 +43,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aboutText => '一个简单强大的K1格式文本转换工具。\n作者：qianzhu233。';
+
+  @override
+  String get inputLabel => '输入';
+
+  @override
+  String get outputLabel => '输出';
+
+  @override
+  String get previewLabel => '预览';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -84,4 +93,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get aboutText => '一個簡單強大的K1格式文本轉換工具。\n作者：qianzhu233。';
+
+  @override
+  String get inputLabel => '輸入';
+
+  @override
+  String get outputLabel => '輸出';
+
+  @override
+  String get previewLabel => '預覽';
 }

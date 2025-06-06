@@ -43,4 +43,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutText => 'A simple and powerful tool to convert text to K1 format.\nDeveloped by qianzhu233.';
+
+  @override
+  String get inputLabel => 'Input';
+
+  @override
+  String get outputLabel => 'Output';
+
+  @override
+  String get previewLabel => 'Preview';
 }

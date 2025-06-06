@@ -10,5 +10,8 @@
   "copiedText": "クリップボードにコピーしました！",
   "hintText": "変換するテキストを入力してください...",
   "version": "バージョン：1.0.3",
-  "aboutText": "K1形式テキストへの変換ツール。\n開発者：qianzhu233。"
+  "aboutText": "K1形式テキストへの変換ツール。\n開発者：qianzhu233。",
+  "inputLabel": "入力",
+  "outputLabel": "出力",
+  "previewLabel": "プレビュー"
 }

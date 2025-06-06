@@ -43,4 +43,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aboutText => 'K1形式テキストへの変換ツール。\n開発者：qianzhu233。';
+
+  @override
+  String get inputLabel => '入力';
+
+  @override
+  String get outputLabel => '出力';
+
+  @override
+  String get previewLabel => 'プレビュー';
 }
