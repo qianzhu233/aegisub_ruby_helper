@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:aegisub_ruby_helper/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,10 +17,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
+  Locale? _locale;
 
   void _toggleThemeMode(ThemeMode mode) {
     setState(() {
       _themeMode = mode;
+    });
+  }
+
+  void _changeLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
     });
   }
 
@@ -36,11 +46,26 @@ class _MyAppState extends State<MyApp> {
         fontFamily: 'Roboto',
       ),
       themeMode: _themeMode,
+      locale: _locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('zh'),
+        Locale('zh', 'CN'),
+        Locale('zh', 'TW'),
+        Locale('ja'),
+      ],
       home: DefaultTabController(
         length: 2,
         child: MyHomePage(
           themeMode: _themeMode,
           onThemeChanged: _toggleThemeMode,
+          onLocaleChanged: _changeLocale,
         ),
       ),
     );
@@ -50,8 +75,14 @@ class _MyAppState extends State<MyApp> {
 class MyHomePage extends StatefulWidget {
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
+  final ValueChanged<Locale> onLocaleChanged;
 
-  const MyHomePage({super.key, required this.themeMode, required this.onThemeChanged});
+  const MyHomePage({
+    super.key,
+    required this.themeMode,
+    required this.onThemeChanged,
+    required this.onLocaleChanged,
+  });
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -62,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _convertedText = '';
 
   Widget _buildInputField(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -75,8 +107,8 @@ class _MyHomePageState extends State<MyHomePage> {
           maxLines: null,
           expands: true,
           scrollPhysics: const BouncingScrollPhysics(),
-          decoration: const InputDecoration(
-            hintText: 'Enter text to convert...',
+          decoration: InputDecoration(
+            hintText: loc.hintText,
             border: InputBorder.none,
           ),
           style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
@@ -175,13 +207,19 @@ String _processLineForK1(String line) {
   void _copyToClipboard() {
     if (_convertedText.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: _convertedText));
+      final loc = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
-            children: const [
-              Icon(Icons.check_circle_outline, color: Colors.green),
-              SizedBox(width: 8),
-              Expanded(child: Text('Text copied to clipboard!', style: TextStyle(fontWeight: FontWeight.bold))),
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.green),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  loc.copiedText,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ],
           ),
           behavior: SnackBarBehavior.floating,
@@ -192,6 +230,7 @@ String _processLineForK1(String line) {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -199,18 +238,18 @@ String _processLineForK1(String line) {
             const Icon(Icons.text_fields, size: 28),
             const SizedBox(width: 8),
             Text(
-              'AegisubRubyHelper',
-              style: TextStyle(
+              loc.appTitle,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
-        bottom: const TabBar(
+        bottom: TabBar(
           tabs: [
-            Tab(icon: Icon(Icons.edit, size: 20), text: 'Convert'),
-            Tab(icon: Icon(Icons.info_outline, size: 20), text: 'About'),
+            Tab(icon: const Icon(Icons.edit, size: 20), text: loc.tabConvert),
+            Tab(icon: const Icon(Icons.info_outline, size: 20), text: loc.tabAbout),
           ],
         ),
         actions: [
@@ -218,17 +257,39 @@ String _processLineForK1(String line) {
             icon: const Icon(Icons.brightness_6),
             onSelected: widget.onThemeChanged,
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: ThemeMode.system,
-                child: Text('System Default'),
+                child: Text(loc.themeSystem),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: ThemeMode.light,
-                child: Text('Light Mode'),
+                child: Text(loc.themeLight),
+              ),
+              PopupMenuItem(
+                value: ThemeMode.dark,
+                child: Text(loc.themeDark),
+              ),
+            ],
+          ),
+          PopupMenuButton<Locale>(
+            icon: const Icon(Icons.language),
+            onSelected: widget.onLocaleChanged,
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: Locale('en'),
+                child: Text('English'),
               ),
               const PopupMenuItem(
-                value: ThemeMode.dark,
-                child: Text('Dark Mode'),
+                value: Locale('zh', 'CN'),
+                child: Text('简体中文'),
+              ),
+              const PopupMenuItem(
+                value: Locale('zh', 'TW'),
+                child: Text('繁體中文'),
+              ),
+              const PopupMenuItem(
+                value: Locale('ja'),
+                child: Text('日本語'),
               ),
             ],
           ),
@@ -280,12 +341,12 @@ String _processLineForK1(String line) {
                         ElevatedButton.icon(
                           onPressed: _convertText,
                           icon: const Icon(Icons.transform),
-                          label: const Text('Convert Text'),
+                          label: Text(loc.btnConvert),
                         ),
                         ElevatedButton.icon(
                           onPressed: _copyToClipboard,
                           icon: const Icon(Icons.copy),
-                          label: const Text('Copy to Clipboard'),
+                          label: Text(loc.btnCopy),
                         ),
                       ],
                     ),
@@ -294,28 +355,27 @@ String _processLineForK1(String line) {
               },
             ),
           ),
-          // 关于页面
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Icon(Icons.app_registration, size: 50),
-                  SizedBox(height: 10),
+                  const Icon(Icons.app_registration, size: 50),
+                  const SizedBox(height: 10),
                   Text(
-                    'AegisubRubyHelper',
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                    loc.appTitle,
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
-                    'Version: 1.0.2',
-                    style: TextStyle(fontSize: 18),
+                    loc.version,
+                    style: const TextStyle(fontSize: 18),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
-                    'A simple and powerful tool to convert text to K1 format.\nDeveloped by qianzhu233.',
-                    style: TextStyle(fontSize: 16),
+                    loc.aboutText,
+                    style: const TextStyle(fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -324,7 +384,6 @@ String _processLineForK1(String line) {
           ),
         ],
       ),
-
     );
   }
 }

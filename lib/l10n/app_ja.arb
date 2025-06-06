@@ -1,0 +1,14 @@
+{
+  "appTitle": "AegisubRubyHelper",
+  "tabConvert": "変換",
+  "tabAbout": "情報",
+  "themeSystem": "システムに従う",
+  "themeLight": "ライトモード",
+  "themeDark": "ダークモード",
+  "btnConvert": "テキスト変換",
+  "btnCopy": "クリップボードにコピー",
+  "copiedText": "クリップボードにコピーしました！",
+  "hintText": "変換するテキストを入力してください...",
+  "version": "バージョン：1.0.3",
+  "aboutText": "K1形式テキストへの変換ツール。\n開発者：qianzhu233。"
+}

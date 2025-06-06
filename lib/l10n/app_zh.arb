@@ -1,0 +1,14 @@
+{
+  "appTitle": "AegisubRubyHelper",
+  "tabConvert": "转换",
+  "tabAbout": "关于",
+  "themeSystem": "跟随系统",
+  "themeLight": "浅色模式",
+  "themeDark": "深色模式",
+  "btnConvert": "转换文本",
+  "btnCopy": "复制到剪贴板",
+  "copiedText": "已复制到剪贴板！",
+  "hintText": "输入要转换的文本...",
+  "version": "版本：1.0.3",
+  "aboutText": "一个简单强大的K1格式文本转换工具。\n作者：qianzhu233。"
+}
