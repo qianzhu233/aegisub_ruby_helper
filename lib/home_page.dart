@@ -24,6 +24,16 @@ class _HomePageState extends State<HomePage> {
   String _previewText = '';
   int _selectedDrawerIndex = 0;
 
+  // 格式开关，新增 'paren2'
+  final Map<String, bool> _formatEnabled = {
+    'photrans': true,
+    'paren': true,
+    'paren2': true, // 新增
+    'bracket': true,
+    'angle': true,
+    'square': true,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -101,28 +111,90 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildFormatMenu(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.tune),
+      tooltip: '格式检测设置',
+      itemBuilder: (context) => [
+        CheckedPopupMenuItem(
+          value: 'photrans',
+          checked: _formatEnabled['photrans']!,
+          child: const Text('{{photrans|汉字|假名}}'),
+        ),
+        CheckedPopupMenuItem(
+          value: 'paren',
+          checked: _formatEnabled['paren']!,
+          child: const Text('汉字（假名）'),
+        ),
+        CheckedPopupMenuItem(
+          value: 'paren2',
+          checked: _formatEnabled['paren2']!,
+          child: const Text('汉字(假名)'),
+        ),
+        CheckedPopupMenuItem(
+          value: 'bracket',
+          checked: _formatEnabled['bracket']!,
+          child: const Text('[汉字|假名]'),
+        ),
+        CheckedPopupMenuItem(
+          value: 'angle',
+          checked: _formatEnabled['angle']!,
+          child: const Text('〈汉字/假名〉'),
+        ),
+        CheckedPopupMenuItem(
+          value: 'square',
+          checked: _formatEnabled['square']!,
+          child: const Text('【汉字(假名)】'),
+        ),
+      ],
+      onSelected: (key) {
+        setState(() {
+          _formatEnabled[key] = !_formatEnabled[key]!;
+          _convertedText = convertToK1Format(_controller.text);
+          _previewText = buildPreviewText(_controller.text);
+        });
+      },
+    );
+  }
+
   String buildPreviewText(String text) {
     String result = text;
-    result = result.replaceAllMapped(
-      RegExp(r'\{\{[pP]hotrans\|([^|]+)\|([^}]+)\}\}'),
-      (m) => '${m.group(1)}[${m.group(2)}]',
-    );
-    result = result.replaceAllMapped(
-      RegExp(r'([\u4E00-\u9FFF]+)（([^）]+)）'),
-      (m) => '${m.group(1)}[${m.group(2)}]',
-    );
-    result = result.replaceAllMapped(
-      RegExp(r'\[([\u4E00-\u9FFF]+)\|([^\]]+)\]'),
-      (m) => '${m.group(1)}[${m.group(2)}]',
-    );
-    result = result.replaceAllMapped(
-      RegExp(r'〈([\u4E00-\u9FFF]+)\/([^〉]+)〉'),
-      (m) => '${m.group(1)}[${m.group(2)}]',
-    );
-    result = result.replaceAllMapped(
-      RegExp(r'【([\u4E00-\u9FFF]+)\(([^)]+)\)】'),
-      (m) => '${m.group(1)}[${m.group(2)}]',
-    );
+    if (_formatEnabled['photrans']!) {
+      result = result.replaceAllMapped(
+        RegExp(r'\{\{[pP]hotrans\|([^|]+)\|([^}]+)\}\}'),
+        (m) => '${m.group(1)}[${m.group(2)}]',
+      );
+    }
+    if (_formatEnabled['paren']!) {
+      result = result.replaceAllMapped(
+        RegExp(r'([\u4E00-\u9FFF]+)（([^）]+)）'),
+        (m) => '${m.group(1)}[${m.group(2)}]',
+      );
+    }
+    if (_formatEnabled['paren2']!) {
+      result = result.replaceAllMapped(
+        RegExp(r'([\u4E00-\u9FFF]+)\(([^)]+)\)'),
+        (m) => '${m.group(1)}[${m.group(2)}]',
+      );
+    }
+    if (_formatEnabled['bracket']!) {
+      result = result.replaceAllMapped(
+        RegExp(r'\[([\u4E00-\u9FFF]+)\|([^\]]+)\]'),
+        (m) => '${m.group(1)}[${m.group(2)}]',
+      );
+    }
+    if (_formatEnabled['angle']!) {
+      result = result.replaceAllMapped(
+        RegExp(r'〈([\u4E00-\u9FFF]+)\/([^〉]+)〉'),
+        (m) => '${m.group(1)}[${m.group(2)}]',
+      );
+    }
+    if (_formatEnabled['square']!) {
+      result = result.replaceAllMapped(
+        RegExp(r'【([\u4E00-\u9FFF]+)\(([^)]+)\)】'),
+        (m) => '${m.group(1)}[${m.group(2)}]',
+      );
+    }
     return result;
   }
 
@@ -169,6 +241,7 @@ class _HomePageState extends State<HomePage> {
     final pattern = RegExp(
       r'\{\{[pP]hotrans\|([^|]+)\|([^}]+)\}\}|' +
       r'([\u4E00-\u9FFF]+)（([^）]+)）|' +
+      r'([\u4E00-\u9FFF]+)\(([^)]+)\)|' +
       r'\[([\u4E00-\u9FFF]+)\|([^\]]+)\]|' +
       r'〈([\u4E00-\u9FFF]+)\/([^〉]+)〉|' +
       r'【([\u4E00-\u9FFF]+)\(([^)]+)\)】'
@@ -248,13 +321,26 @@ class _HomePageState extends State<HomePage> {
 
   String convertToK1Format(String text) {
     List<String> lines = text.split('\n');
-    RegExp pattern = RegExp(
-      r'\{\{[pP]hotrans\|[^|]+\|[^}]+\}\}|' +
-      r'([\u4E00-\u9FFF]+)（([^）]+)）|' +
-      r'\[[\u4E00-\u9FFF]+\|[^\]]+\]|' +
-      r'〈[\u4E00-\u9FFF]+\/[^〉]+〉|' +
-      r'【[\u4E00-\u9FFF]+\([^)]+\)】'
-    );
+    List<String> parts = [];
+    if (_formatEnabled['square']!) {
+      parts.add(r'【[\u4E00-\u9FFF]+\([^)]+\)】');
+    }
+    if (_formatEnabled['photrans']!) {
+      parts.add(r'\{\{[pP]hotrans\|[^|]+\|[^}]+\}\}');
+    }
+    if (_formatEnabled['paren']!) {
+      parts.add(r'([\u4E00-\u9FFF]+)（([^）]+)）');
+    }
+    if (_formatEnabled['paren2']!) {
+      parts.add(r'([\u4E00-\u9FFF]+)\(([^)]+)\)');
+    }
+    if (_formatEnabled['bracket']!) {
+      parts.add(r'\[[\u4E00-\u9FFF]+\|[^\]]+\]');
+    }
+    if (_formatEnabled['angle']!) {
+      parts.add(r'〈[\u4E00-\u9FFF]+\/[^〉]+〉');
+    }
+    RegExp pattern = RegExp(parts.join('|'));
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i];
       if (pattern.hasMatch(line)) {
@@ -268,22 +354,40 @@ class _HomePageState extends State<HomePage> {
     if (!line.startsWith(r'{\k1}')) {
       line = '{\\k1}$line';
     }
-    line = line.replaceAllMapped(RegExp(r'\{\{[pP]hotrans\|([^|]+)\|([^}]+)\}\}'), (match) {
-      return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
-    });
-    line = line.replaceAllMapped(RegExp(r'([\u4E00-\u9FFF]+)（([^）]+)）'), (match) {
-      return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
-    });
-    line = line.replaceAllMapped(RegExp(r'\[([\u4E00-\u9FFF]+)\|([^\]]+)\]'), (match) {
-      return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
-    });
-    line = line.replaceAllMapped(RegExp(r'〈([\u4E00-\u9FFF]+)\/([^〉]+)〉'), (match) {
-      return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
-    });
-    line = line.replaceAllMapped(RegExp(r'【([\u4E00-\u9FFF]+)\(([^)]+)\)】'), (match) {
-      return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
-    });
-    line = line.replaceAllMapped(RegExp(r'(\S)([ 　]+)(\S)'), (match) {
+    if (_formatEnabled['square']!) {
+      // 只转换【汉字(假名)】为{\k1}汉字|<假名{\k1}，去掉【和】
+      line = line.replaceAllMapped(RegExp(r'【([\u4E00-\u9FFF]+)\(([^)]+)\)】'), (match) {
+        return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
+      });
+    }
+    if (_formatEnabled['photrans']!) {
+      line = line.replaceAllMapped(RegExp(r'\{\{[pP]hotrans\|([^|]+)\|([^}]+)\}\}'), (match) {
+        return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
+      });
+    }
+    if (_formatEnabled['paren']!) {
+      line = line.replaceAllMapped(RegExp(r'([\u4E00-\u9FFF]+)（([^）]+)）'), (match) {
+        return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
+      });
+    }
+    if (_formatEnabled['paren2']!) {
+      line = line.replaceAllMapped(RegExp(r'([\u4E00-\u9FFF]+)\(([^)]+)\)'), (match) {
+        return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
+      });
+    }
+    if (_formatEnabled['bracket']!) {
+      line = line.replaceAllMapped(RegExp(r'\[([\u4E00-\u9FFF]+)\|([^\]]+)\]'), (match) {
+        return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
+      });
+    }
+    if (_formatEnabled['angle']!) {
+      line = line.replaceAllMapped(RegExp(r'〈([\u4E00-\u9FFF]+)\/([^〉]+)〉'), (match) {
+        return '{\\k1}${match.group(1)}|<${match.group(2)}{\\k1}';
+      });
+    }
+    
+    // 只对非【...】部分加{\k1}空格处理
+    line = line.replaceAllMapped(RegExp(r'(?!【[^】]*)(\S)([ 　]+)(\S)(?![^【]*】)'), (match) {
       return '${match.group(1)}{\\k1}${match.group(2)}{\\k1}${match.group(3)}';
     });
     line = line.replaceAll(RegExp(r'(\{\\k1\})+'), '{\\k1}');
@@ -334,6 +438,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         actions: [
+          _buildFormatMenu(context),
           PopupMenuButton<ThemeMode>(
             icon: const Icon(Icons.brightness_6),
             onSelected: widget.onThemeChanged,
