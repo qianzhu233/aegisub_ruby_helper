@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            loc.inputLabel ?? 'Input',
+            loc.inputLabel,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 15,
@@ -495,8 +495,8 @@ class _HomePageState extends State<HomePage> {
             labelColor: Theme.of(context).colorScheme.primary,
             unselectedLabelColor: Theme.of(context).textTheme.bodyMedium?.color,
             tabs: [
-              Tab(text: loc.outputLabel ?? 'Output'),
-              Tab(text: loc.previewLabel ?? 'Preview'),
+              Tab(text: loc.outputLabel),
+              Tab(text: loc.previewLabel),
             ],
           ),
           Expanded(

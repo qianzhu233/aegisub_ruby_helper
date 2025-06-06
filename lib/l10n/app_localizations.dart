@@ -95,94 +95,95 @@ abstract class AppLocalizations {
     Locale('en'),
     Locale('ja'),
     Locale('zh'),
+    Locale('zh', 'CN'),
     Locale('zh', 'TW')
   ];
 
-  /// No description provided for @appTitle.
+  /// App title
   ///
   /// In en, this message translates to:
   /// **'AegisubRubyHelper'**
   String get appTitle;
 
-  /// No description provided for @tabConvert.
+  /// Convert tab
   ///
   /// In en, this message translates to:
   /// **'Convert'**
   String get tabConvert;
 
-  /// No description provided for @tabAbout.
+  /// About tab
   ///
   /// In en, this message translates to:
   /// **'About'**
   String get tabAbout;
 
-  /// No description provided for @themeSystem.
+  /// System theme
   ///
   /// In en, this message translates to:
   /// **'System Default'**
   String get themeSystem;
 
-  /// No description provided for @themeLight.
+  /// Light theme
   ///
   /// In en, this message translates to:
   /// **'Light Mode'**
   String get themeLight;
 
-  /// No description provided for @themeDark.
+  /// Dark theme
   ///
   /// In en, this message translates to:
   /// **'Dark Mode'**
   String get themeDark;
 
-  /// No description provided for @btnConvert.
+  /// Convert button
   ///
   /// In en, this message translates to:
   /// **'Convert Text'**
   String get btnConvert;
 
-  /// No description provided for @btnCopy.
+  /// Copy button
   ///
   /// In en, this message translates to:
   /// **'Copy to Clipboard'**
   String get btnCopy;
 
-  /// No description provided for @copiedText.
+  /// Copy success message
   ///
   /// In en, this message translates to:
   /// **'Text copied to clipboard!'**
   String get copiedText;
 
-  /// No description provided for @hintText.
+  /// Input field hint
   ///
   /// In en, this message translates to:
   /// **'Enter text to convert...'**
   String get hintText;
 
-  /// No description provided for @version.
+  /// Version number
   ///
   /// In en, this message translates to:
   /// **'Version: 1.0.3'**
   String get version;
 
-  /// No description provided for @aboutText.
+  /// About content
   ///
   /// In en, this message translates to:
   /// **'A simple and powerful tool to convert text to K1 format.\nDeveloped by qianzhu233.'**
   String get aboutText;
 
-  /// No description provided for @inputLabel.
+  /// Input field label
   ///
   /// In en, this message translates to:
   /// **'Input'**
   String get inputLabel;
 
-  /// No description provided for @outputLabel.
+  /// Output field label
   ///
   /// In en, this message translates to:
   /// **'Output'**
   String get outputLabel;
 
-  /// No description provided for @previewLabel.
+  /// Preview field label
   ///
   /// In en, this message translates to:
   /// **'Preview'**
@@ -210,7 +211,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'zh': {
   switch (locale.countryCode) {
-    case 'TW': return AppLocalizationsZhTw();
+    case 'CN': return AppLocalizationsZhCn();
+case 'TW': return AppLocalizationsZhTw();
    }
   break;
    }
